@@ -63,7 +63,7 @@ db.connect((err) => {
     });
     // Question 4 goes here
     app.get('/provider-first-name', (req,res) => {
-        db.query('SELECT first_name, last_name, provider_specialty FROM providers ORDER BY first_name', (err, results) => {
+        db.query('SELECT first_name, last_name, provider_specialty FROM providers ORDER BY provider_specialty', (err, results) => {
                 if (err){
                     console.error(err);
                     res.status(500).send('Error receiving data');

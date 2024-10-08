@@ -22,54 +22,63 @@ db.connect((err) => {
     if (err) return console.log('Error connecting to Mysql db');
     console.log('Connected successfully to Mysql as id: ', db.threadId);
 
-    app.set('view engine', 'ejs');
-    app.set('views', __dirname + '/views');
+    // app.set('view engine', 'ejs');
+    // app.set('views', __dirname + '/views');
     // Question 1 goes here
-    app.get('/patient-data', (req,res) => {
+    app.get('/patients', (req,res) => {
         db.query('SELECT patient_id, first_name, last_name, date_of_birth FROM patients', (err, results) => {
                 if (err){
                     console.error(err);
                     res.status(500).send('Error receiving data');
                 } else {
-                    res.render('patient-data', {results: results});
+                    res.status(200).send(results);
                 }
             }
         )
     });
-    // Question 2 goes here
-    app.get('/provider-data', (req,res) => {
+    // // Question 2 goes here
+    app.get('/providers', (req,res) => {
         db.query('SELECT first_name, last_name, provider_specialty FROM providers', (err, results) => {
                 if (err){
                     console.error(err);
                     res.status(500).send('Error receiving data');
                 } else {
-                    res.render('provider-data', {results: results});
+                    res.status(200).send(results);
                 }
             }
         )
     });
     // Question 3 goes here
-    app.get('/patients-first-name', (req,res) => {
-        db.query('SELECT patient_id, first_name, last_name, date_of_birth FROM patients  ORDER BY first_name', 
-            (err, results) => {
-                if (err){
-                    console.error(err);
-                    res.status(500).send('Error receiving data');
-                } else {
-                    res.render('patients-first-name', {results: results});
-                }
+    app.get('/patients/first-name/:firstName' ,(req, res) => {
+        const firstName = req.params.firstName;
+        const query = 'SELECT patient_id, first_name, last_name, date_of_birth FROM patients WHERE first_name = ?'; 
+    
+        db.query(query, [firstName], (err,results) => {
+            if (err) {
+                console.error('Error retrieving patient by first_name:', err)
+                return res.status(500).send('error fetching first_name')
             }
-        )
-    });
+            if (results.length === 0){
+                return res.status(404).send('No patients found with that name');
+            }
+            // res.json(results);
+            res.status(200).send(results);
+        })
+    })
     // Question 4 goes here
-    app.get('/provider-first-name', (req,res) => {
-        db.query('SELECT first_name, last_name, provider_specialty FROM providers ORDER BY provider_specialty', (err, results) => {
+    app.get('/providers/specialty/:providerSpecialty', (req,res) => {
+        const providerSpecialty = req.params.providerSpecialty;
+        const query = 'SELECT first_name, last_name, provider_specialty FROM providers WHERE provider_specialty = ?'
+        
+        db.query(query, [providerSpecialty], (err,results) => {
                 if (err){
-                    console.error(err);
-                    res.status(500).send('Error receiving data');
-                } else {
-                    res.render('provider-first-name', {results: results});
+                    console.error('Error retrieving providers by first name:', err);
+                    return res.status(500).send('Error fetching provider data');
+                } 
+                if (results.length === 0) {
+                    return res.status(404).send('No provider found with that specialty');
                 }
+                res.status(200).send(results);
             }
         )
     });
